@@ -11,15 +11,15 @@ class PingService extends GetxController with StateMixin<Pong?> {
   PingService({WelcomeRepository? repository})
       : repository = repository ?? WelcomeRepository();
 
-  final Rx<Pong?> _welcome = Rx(null);
+  final Rx<Pong?> _pong = Rx(null);
 
-  Pong? get welcome => _welcome.value;
+  Pong? get pong => _pong.value;
 
   Future<Pong?> ping() async {
     try {
       Pong data = await repository.getPong();
-      _welcome.value = data;
-      return _welcome.value;
+      _pong.value = data;
+      return _pong.value;
     } catch (e) {
       log(e.toString());
       return null;

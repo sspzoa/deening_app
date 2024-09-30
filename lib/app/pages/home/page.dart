@@ -22,8 +22,8 @@ class HomePage extends GetView<HomePageController> {
         child: Center(
           child: Obx(
             () {
-              final welcome = controller.pingService.welcome;
-              if (welcome == null) {
+              final pong = controller.pingService.pong;
+              if (pong == null) {
                 return Center(
                     child: CircularProgressIndicator(
                   color: colorTheme.coreAccent,
@@ -31,7 +31,7 @@ class HomePage extends GetView<HomePageController> {
               }
               return Center(
                 child: Text(
-                  welcome.message,
+                  pong.message,
                   style: textTheme.display,
                 ),
               );
