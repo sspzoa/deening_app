@@ -4,8 +4,8 @@ import 'colors.dart';
 import 'theme.dart';
 import 'typography.dart';
 
-class DanALightThemeColors extends DanAColors {
-  DanALightThemeColors()
+class CustomLightThemeColors extends CustomColors {
+  CustomLightThemeColors()
       : super(
     solidRed: const Color(0xFFFF4035),
     solidOrange: const Color(0xFFFF9A05),
@@ -55,8 +55,8 @@ class DanALightThemeColors extends DanAColors {
     componentsTranslucentPrimary: const Color(0x1A797C8A),
     componentsTranslucentSecondary: const Color(0x14797C8A),
     componentsTranslucentTertiary: const Color(0x0A797C8A),
-    coreAccent: const Color(0xFF5472EB),
-    coreAccentTranslucent: const Color(0x1A5472EB),
+    coreAccent: const Color(0xFFFF6F61),
+    coreAccentTranslucent: const Color(0x1AFF6F61),
     coreStatusPositive: const Color(0xFF32CC58),
     coreStatusWarning: const Color(0xFFF5C905),
     coreStatusNegative: const Color(0xFFFF4035),
@@ -70,14 +70,14 @@ class DanALightThemeColors extends DanAColors {
   );
 }
 
-class DanALightThemeTypography extends DanATypography {
+class DanALightThemeTypography extends CustomTypography {
   DanALightThemeTypography()
-      : super(defaultColor: DanALightThemeColors().contentStandardPrimary);
+      : super(defaultColor: CustomLightThemeColors().contentStandardPrimary);
 }
 
-class CustomLightTheme extends DanATheme {
+class CustomLightTheme extends CustomTheme {
   CustomLightTheme()
       : super(
-      colors: DanALightThemeColors(),
+      colors: CustomLightThemeColors(),
       textStyle: DanALightThemeTypography());
 }

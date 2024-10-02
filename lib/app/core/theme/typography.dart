@@ -25,10 +25,10 @@ abstract class Weight {
   static const heavy = FontWeight.w900;
 }
 
-class DanATypography extends ThemeExtension<DanATypography> {
+class CustomTypography extends ThemeExtension<CustomTypography> {
   final Color defaultColor;
 
-  DanATypography({
+  CustomTypography({
     required this.defaultColor,
     TextStyle? display,
     TextStyle? title,
@@ -61,7 +61,7 @@ class DanATypography extends ThemeExtension<DanATypography> {
   final TextStyle caption;
 
   @override
-  ThemeExtension<DanATypography> copyWith({
+  ThemeExtension<CustomTypography> copyWith({
     Color? defaultColor,
     TextStyle? display,
     TextStyle? title,
@@ -71,7 +71,7 @@ class DanATypography extends ThemeExtension<DanATypography> {
     TextStyle? footnote,
     TextStyle? caption,
   }) {
-    return DanATypography(
+    return CustomTypography(
       defaultColor: defaultColor ?? this.defaultColor,
       display: display ?? this.display,
       title: title ?? this.title,
@@ -84,12 +84,12 @@ class DanATypography extends ThemeExtension<DanATypography> {
   }
 
   @override
-  ThemeExtension<DanATypography> lerp(
-      covariant ThemeExtension<DanATypography>? other, double t) {
-    if (other is! DanATypography) {
+  ThemeExtension<CustomTypography> lerp(
+      covariant ThemeExtension<CustomTypography>? other, double t) {
+    if (other is! CustomTypography) {
       return this;
     }
-    return DanATypography(
+    return CustomTypography(
       defaultColor: Color.lerp(defaultColor, other.defaultColor, t)!,
       display: TextStyle.lerp(display, other.display, t),
       title: TextStyle.lerp(title, other.title, t),

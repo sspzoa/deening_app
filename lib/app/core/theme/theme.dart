@@ -1,9 +1,9 @@
 import 'colors.dart';
 import 'typography.dart';
 
-class DanATheme {
-  final DanAColors colors;
-  final DanATypography textStyle;
+class CustomTheme {
+  final CustomColors colors;
+  final CustomTypography textStyle;
 
-  DanATheme({required this.colors, required this.textStyle});
+  CustomTheme({required this.colors, required this.textStyle});
 }

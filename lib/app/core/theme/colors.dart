@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class DanAColors extends ThemeExtension<DanAColors> {
+class CustomColors extends ThemeExtension<CustomColors> {
   final Color solidRed;
   final Color solidOrange;
   final Color solidYellow;
@@ -74,7 +74,7 @@ class DanAColors extends ThemeExtension<DanAColors> {
   final Color syntaxOperator;
   final Color syntaxKeyword;
 
-  DanAColors({
+  CustomColors({
     required this.solidRed,
     required this.solidOrange,
     required this.solidYellow,
@@ -138,7 +138,7 @@ class DanAColors extends ThemeExtension<DanAColors> {
   });
 
   @override
-  ThemeExtension<DanAColors> copyWith({
+  ThemeExtension<CustomColors> copyWith({
     Color? solidRed,
     Color? solidOrange,
     Color? solidYellow,
@@ -200,7 +200,7 @@ class DanAColors extends ThemeExtension<DanAColors> {
     Color? syntaxOperator,
     Color? syntaxKeyword,
   }) {
-    return DanAColors(
+    return CustomColors(
       solidRed: solidRed ?? this.solidRed,
       solidOrange: solidOrange ?? this.solidOrange,
       solidYellow: solidYellow ?? this.solidYellow,
@@ -265,11 +265,11 @@ class DanAColors extends ThemeExtension<DanAColors> {
   }
 
   @override
-  ThemeExtension<DanAColors> lerp(ThemeExtension<DanAColors>? other, double t) {
-    if (other is! DanAColors) {
+  ThemeExtension<CustomColors> lerp(ThemeExtension<CustomColors>? other, double t) {
+    if (other is! CustomColors) {
       return this;
     }
-    return DanAColors(
+    return CustomColors(
       solidRed: Color.lerp(solidRed, other.solidRed, t)!,
       solidOrange: Color.lerp(solidOrange, other.solidOrange, t)!,
       solidYellow: Color.lerp(solidYellow, other.solidYellow, t)!,

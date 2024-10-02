@@ -11,8 +11,8 @@ class HomePage extends GetView<HomePageController> {
 
   @override
   Widget build(BuildContext context) {
-    DanAColors colorTheme = Theme.of(context).extension<DanAColors>()!;
-    DanATypography textTheme = Theme.of(context).extension<DanATypography>()!;
+    CustomColors colorTheme = Theme.of(context).extension<CustomColors>()!;
+    CustomTypography textTheme = Theme.of(context).extension<CustomTypography>()!;
     return Scaffold(
       appBar: AppBar(
         title: const Text("디닝"),
