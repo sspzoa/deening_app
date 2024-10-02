@@ -29,7 +29,7 @@ class TestPage extends GetView<TestPageController> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Route"),
+        title: const Text("Routes"),
         centerTitle: true,
       ),
       body: ListView(
