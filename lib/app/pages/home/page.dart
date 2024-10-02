@@ -24,15 +24,13 @@ class HomePage extends GetView<HomePageController> {
             () {
               final pong = controller.pingService.pong;
               if (pong == null) {
-                return Center(
-                    child: CircularProgressIndicator(
-                  color: colorTheme.coreAccent,
-                ));
+                return const Center(
+                    child: CircularProgressIndicator());
               }
               return Center(
                 child: Text(
                   pong.message,
-                  style: textTheme.display,
+                  style: textTheme.display.copyWith(color: colorTheme.coreAccent),
                 ),
               );
             },
