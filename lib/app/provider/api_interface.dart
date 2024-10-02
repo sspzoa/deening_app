@@ -1,15 +1,26 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:deening_app/app/provider/model/response.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
+import 'model/response.dart';
 
 abstract class ApiProvider {
-  final Dio dio = Dio();
+  late Dio dio = Dio();
+
+  ApiProvider() {
+    dio = Dio(BaseOptions(
+      headers: {
+        'Authorization': 'Bearer ${dotenv.env['ACCESS_TOKEN']}',
+        'Accept': 'application/json',
+      },
+    ));
+  }
 
   Future<CustomHttpResponse> get(String path,
       {Map<String, dynamic>? queryParameters, Options? options}) async {
     Response dioResponse =
-        await dio.get(path, queryParameters: queryParameters, options: options);
+    await dio.get(path, queryParameters: queryParameters, options: options);
     return CustomHttpResponse.fromDioResponse(dioResponse);
   }
 
@@ -26,7 +37,7 @@ abstract class ApiProvider {
         handleData: (rawdata, sink) {
           String strData = String.fromCharCodes(rawdata);
           String formatedData =
-              strData.substring(strData.indexOf('{'), strData.indexOf('}') + 1);
+          strData.substring(strData.indexOf('{'), strData.indexOf('}') + 1);
           Map<String, dynamic> data = json.decode(formatedData);
 
           sink.add(data);
@@ -42,8 +53,8 @@ abstract class ApiProvider {
 
   Future<CustomHttpResponse> post(String path,
       {dynamic data,
-      Map<String, dynamic>? queryParameters,
-      Options? options}) async {
+        Map<String, dynamic>? queryParameters,
+        Options? options}) async {
     Response dioResponse = await dio.post(path,
         data: data, queryParameters: queryParameters, options: options);
     return CustomHttpResponse.fromDioResponse(dioResponse);
