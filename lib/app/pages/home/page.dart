@@ -27,11 +27,14 @@ class HomePage extends GetView<HomePageController> {
                 return const Center(
                     child: CircularProgressIndicator());
               }
-              return Center(
-                child: Text(
-                  pong.message,
-                  style: textTheme.display.copyWith(color: colorTheme.coreAccent),
-                ),
+              return Column(
+                children: [
+                  Text(
+                    pong.message,
+                    style: textTheme.display.copyWith(color: colorTheme.coreAccent),
+                  ),
+                  Text('Pull request test'),
+                ],
               );
             },
           ),
