@@ -19,7 +19,7 @@ class AppLoader {
 
     setPathUrlStrategy();
 
-    // await dotenv.load(fileName: "env/.env", isOptional: true);
+    await dotenv.load(fileName: "env/.env", isOptional: true);
 
     Get.put<ApiProvider>(ProdApiProvider());
 
