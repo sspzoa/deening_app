@@ -7,6 +7,5 @@ class HomePageBinding implements Bindings {
   @override
   void dependencies() {
     Get.lazyPut(() => HomePageController());
-    Get.lazyPut(() => PingService());
   }
 }
