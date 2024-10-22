@@ -1,3 +1,4 @@
+import 'package:deening_app/app/routes/routes.dart';
 import 'package:deening_app/app/widgets/gestureDetector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -14,7 +15,6 @@ class HomePage extends GetView<HomePageController> {
   @override
   Widget build(BuildContext context) {
     final colorTheme = Theme.of(context).extension<CustomColors>()!;
-    final textTheme = Theme.of(context).extension<CustomTypography>()!;
     return Scaffold(
       body: SafeArea(
         child: Padding(
@@ -118,7 +118,7 @@ class IngredientsButton extends StatelessWidget {
     return CustomGestureDetectorWithScaleInteraction(
       onTap: () => {},
       child: CustomGestureDetectorWithOpacityInteraction(
-        onTap: () => {},
+        onTap: () => {Get.toNamed(Routes.REFRIGERATOR)},
         child: Container(
           height: 80,
           decoration: BoxDecoration(
@@ -165,7 +165,7 @@ class PreferenceButton extends StatelessWidget {
     return CustomGestureDetectorWithScaleInteraction(
       onTap: () => {},
       child: CustomGestureDetectorWithOpacityInteraction(
-        onTap: () => {},
+        onTap: () => {Get.toNamed(Routes.PREFERENCE)},
         child: Container(
           height: 80,
           decoration: BoxDecoration(
