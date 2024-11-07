@@ -13,6 +13,7 @@ void main() async {
   runApp(
     GetMaterialApp(
       title: '디닝',
+      debugShowCheckedModeBanner: false,
       theme: lightThemeData,
       darkTheme: darkThemeData,
       initialRoute: kReleaseMode ? Routes.HOME : Routes.TEST,

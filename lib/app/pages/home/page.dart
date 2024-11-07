@@ -140,7 +140,7 @@ class IngredientsButton extends StatelessWidget {
                 ),
                 const SizedBox(width: CustomSpacing.spacing300),
                 Text(
-                  '식재료',
+                  '내 냉장고',
                   style: textTheme.label.copyWith(
                     color: colorTheme.contentStandardSecondary,
                   ),
