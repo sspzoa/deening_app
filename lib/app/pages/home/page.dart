@@ -15,6 +15,7 @@ class HomePage extends GetView<HomePageController> {
   @override
   Widget build(BuildContext context) {
     final colorTheme = Theme.of(context).extension<CustomColors>()!;
+    final textTheme = Theme.of(context).extension<CustomTypography>()!;
     return Scaffold(
       body: SafeArea(
         child: Padding(
@@ -23,6 +24,7 @@ class HomePage extends GetView<HomePageController> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              const Spacer(),
               SvgPicture.asset(
                 'assets/images/logo_with_text.svg',
                 height: 64,
@@ -39,6 +41,11 @@ class HomePage extends GetView<HomePageController> {
                   Expanded(child: PreferenceButton()),
                 ],
               ),
+              const Spacer(),
+              Text('© 2024 sspzoa. All rights reserved.',
+                  style: textTheme.label
+                      .copyWith(color: colorTheme.contentStandardTertiary)),
+              const SizedBox(height: CustomSpacing.spacing550),
             ],
           ),
         ),
