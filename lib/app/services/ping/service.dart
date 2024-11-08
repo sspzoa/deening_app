@@ -6,10 +6,10 @@ import 'model.dart';
 import 'repository.dart';
 
 class PingService extends GetxController with StateMixin<Pong?> {
-  final WelcomeRepository repository;
+  final PingRepository repository;
 
-  PingService({WelcomeRepository? repository})
-      : repository = repository ?? WelcomeRepository();
+  PingService({PingRepository? repository})
+      : repository = repository ?? PingRepository();
 
   final Rx<Pong?> _pong = Rx(null);
 

@@ -1,17 +1,20 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../services/ping/service.dart';
-
 class HomePageController extends GetxController {
-  final PingService pingService = Get.find<PingService>();
+  final searchController = TextEditingController();
 
   @override
-  void onInit() {
-    super.onInit();
-    fetchWelcome();
+  void onClose() {
+    searchController.dispose();
+    super.onClose();
   }
 
-  Future<void> fetchWelcome() async {
-    await pingService.ping();
+  void onSearchChanged(String value) {
+    debugPrint('Search query changed: $value');
+  }
+
+  void onSearchSubmitted(String value) {
+    debugPrint('Search submitted: $value');
   }
 }
