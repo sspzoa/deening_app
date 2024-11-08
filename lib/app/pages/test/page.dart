@@ -39,6 +39,10 @@ class TestPage extends GetView<TestPageController> {
           linkToRoute('/'),
           linkToRoute('/refrigerator'),
           linkToRoute('/preference'),
+          linkToRoute('/search_result'),
+          linkToRoute('/find_recipe'),
+          linkToRoute('/recipe'),
+          linkToRoute('/chat'),
         ],
       ),
     );
