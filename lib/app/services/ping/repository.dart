@@ -4,10 +4,10 @@ import '../../provider/api_interface.dart';
 import '../../provider/model/response.dart';
 import 'model.dart';
 
-class WelcomeRepository {
+class PingRepository {
   final ApiProvider api;
 
-  WelcomeRepository({ApiProvider? api}) : api = api ?? Get.find<ApiProvider>();
+  PingRepository({ApiProvider? api}) : api = api ?? Get.find<ApiProvider>();
 
   Future<Pong> getPong() async {
     String url = '/ping';
