@@ -1,8 +1,12 @@
+import 'package:deening_app/app/core/theme/static.dart';
 import 'package:deening_app/app/core/theme/typography.dart';
+import 'package:deening_app/app/widgets/button.dart';
+import 'package:deening_app/app/widgets/gestureDetector.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../core/theme/colors.dart';
+import '../../widgets/appBar.dart';
 import 'controller.dart';
 
 class SearchResultPage extends GetView<SearchResultPageController> {
@@ -12,11 +16,129 @@ class SearchResultPage extends GetView<SearchResultPageController> {
   Widget build(BuildContext context) {
     final colorTheme = Theme.of(context).extension<CustomColors>()!;
     final textTheme = Theme.of(context).extension<CustomTypography>()!;
-    return const Scaffold(
+
+    return Scaffold(
+      appBar: const CustomAppBar(title: '레시피 검색 결과'),
       body: SafeArea(
-          child: Center(
-        child: Text('This is Find Search Result Page.'),
-      )),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(CustomSpacing.spacing550,
+              CustomSpacing.spacing550, CustomSpacing.spacing550, 0),
+          child: Column(
+            children: [
+              CustomButton(
+                text: "새로운 레시피 찾아보기",
+                onTap: () => {},
+              ),
+              const SizedBox(height: CustomSpacing.spacing400),
+              Expanded(
+                child: SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  child: Column(
+                    children: [
+                      RecipeCard(
+                        imageBase64: controller.base64,
+                        title: '오므라이스',
+                        colorTheme: colorTheme,
+                        textTheme: textTheme,
+                        onTap: () => {},
+                      ),
+                      const SizedBox(height: CustomSpacing.spacing400),
+                      RecipeCard(
+                        imageBase64: controller.base64,
+                        title: '오므라이스',
+                        colorTheme: colorTheme,
+                        textTheme: textTheme,
+                        onTap: () => {},
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class RecipeCard extends StatelessWidget {
+  final String imageBase64;
+  final String title;
+  final CustomColors colorTheme;
+  final CustomTypography textTheme;
+  final VoidCallback onTap;
+
+  const RecipeCard({
+    super.key,
+    required this.imageBase64,
+    required this.title,
+    required this.colorTheme,
+    required this.textTheme,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomGestureDetectorWithOpacityInteraction(
+      onTap: () => {},
+      child: CustomGestureDetectorWithScaleInteraction(
+        onTap: onTap,
+        child: Stack(
+          children: [
+            Container(
+              height: 250,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(CustomRadius.radius300),
+                border: Border.all(color: colorTheme.lineOutline),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(CustomRadius.radius300),
+                child: Image.memory(
+                  Uri.parse(imageBase64).data!.contentAsBytes(),
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+            Container(
+              height: 250,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(CustomRadius.radius300),
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    colorTheme.coreAccentTranslucent,
+                    colorTheme.contentStandardPrimary,
+                  ],
+                ),
+              ),
+            ),
+            Container(
+              height: 250,
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(
+                vertical: CustomSpacing.spacing550,
+                horizontal: CustomSpacing.spacing400,
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Text(
+                    title,
+                    style: textTheme.title.copyWith(
+                      color: colorTheme.contentInvertedPrimary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

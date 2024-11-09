@@ -83,62 +83,60 @@ void _showAddKeywordModal(
       return Container(
         padding: const EdgeInsets.all(CustomSpacing.spacing550),
         width: double.infinity,
-        child: Padding(
-          padding: EdgeInsets.symmetric(vertical: CustomSpacing.spacing550),
-          child: Column(
-            children: [
-              Text('키워드 입력하기',
-                  style: textTheme.heading.copyWith(
-                    color: colorTheme.contentStandardPrimary,
-                    fontWeight: FontWeight.bold,
-                  )),
-              const SizedBox(height: CustomSpacing.spacing200),
-              Text('키워드를 입력해 취향에 맞는 레시피를 추천받으세요 ',
-                  style: textTheme.footnote.copyWith(
-                    color: colorTheme.contentStandardTertiary,
-                  )),
-              const Spacer(),
-              TextField(
-                controller: controller.keywordController,
-                decoration: InputDecoration(
-                  hintText: '키워드를 입력하세요',
-                  hintStyle: textTheme.body.copyWith(
-                    color: colorTheme.contentStandardTertiary,
-                  ),
-                  filled: true,
-                  fillColor: colorTheme.componentsFillStandardPrimary,
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(CustomRadius.radius300),
-                    borderSide: BorderSide(
-                      color: colorTheme.lineOutline,
-                    ),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(CustomRadius.radius300),
-                    borderSide: BorderSide(
-                      color: colorTheme.coreAccent,
-                    ),
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: CustomSpacing.spacing300,
-                    vertical: CustomSpacing.spacing200,
-                  ),
-                ),
-                style: textTheme.body.copyWith(
+        child: Column(
+          children: [
+            Text('키워드 입력하기',
+                style: textTheme.heading.copyWith(
                   color: colorTheme.contentStandardPrimary,
+                  fontWeight: FontWeight.bold,
+                )),
+            const SizedBox(height: CustomSpacing.spacing200),
+            Text('키워드를 입력해 취향에 맞는 레시피를 추천받으세요 ',
+                style: textTheme.footnote.copyWith(
+                  color: colorTheme.contentStandardTertiary,
+                )),
+            const Spacer(),
+            TextField(
+              controller: controller.keywordController,
+              decoration: InputDecoration(
+                hintText: '키워드를 입력하세요',
+                hintStyle: textTheme.body.copyWith(
+                  color: colorTheme.contentStandardTertiary,
+                ),
+                filled: true,
+                fillColor: colorTheme.componentsFillStandardPrimary,
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(CustomRadius.radius300),
+                  borderSide: BorderSide(
+                    color: colorTheme.lineOutline,
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(CustomRadius.radius300),
+                  borderSide: BorderSide(
+                    color: colorTheme.coreAccent,
+                  ),
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: CustomSpacing.spacing400,
+                  vertical: CustomSpacing.spacing300,
                 ),
               ),
-              const Spacer(),
-              CustomButton(
-                text: '추가하기',
-                icon: Icons.mode_edit_outline_outlined,
-                onTap: () {
-                  controller.addKeyword(controller.keywordController.text);
-                  Navigator.pop(context);
-                },
+              style: textTheme.body.copyWith(
+                color: colorTheme.contentStandardPrimary,
               ),
-            ],
-          ),
+            ),
+            const SizedBox(height: CustomSpacing.spacing200),
+            CustomButton(
+              text: '추가하기',
+              icon: Icons.mode_edit_outline_outlined,
+              onTap: () {
+                controller.addKeyword(controller.keywordController.text);
+                Navigator.pop(context);
+              },
+            ),
+            const SizedBox(height: CustomSpacing.spacing550),
+          ],
         ),
       );
     },

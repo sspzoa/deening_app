@@ -48,7 +48,8 @@ class RefrigeratorPage extends GetView<RefrigeratorPageController> {
       ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(CustomSpacing.spacing550),
+          padding: const EdgeInsets.fromLTRB(CustomSpacing.spacing550,
+              CustomSpacing.spacing550, CustomSpacing.spacing550, 0),
           child: Column(
             children: [
               Obx(() => StorageTypeSlider(
@@ -90,33 +91,31 @@ void _showAddIngredientModal(
       return Container(
         padding: const EdgeInsets.all(CustomSpacing.spacing550),
         width: double.infinity,
-        child: Padding(
-          padding: EdgeInsets.symmetric(vertical: CustomSpacing.spacing550),
-          child: Column(
-            children: [
-              Text('입력 방식 선택하기',
-                  style: textTheme.heading.copyWith(
-                    color: colorTheme.contentStandardPrimary,
-                    fontWeight: FontWeight.bold,
-                  )),
-              const SizedBox(height: CustomSpacing.spacing200),
-              Text('사용할 식재료를 입력할 방식을 선택해주세요.',
-                  style: textTheme.footnote.copyWith(
-                    color: colorTheme.contentStandardTertiary,
-                  )),
-              const Spacer(),
-              CustomButton(
-                text: '직접 입력하기',
-                icon: Icons.mode_edit_outline_outlined,
-                onTap: () => {},
-              ),
-              const SizedBox(height: CustomSpacing.spacing200),
-              CustomButton(
-                  text: '사진으로 입력하기',
-                  icon: Icons.camera_alt_outlined,
-                  onTap: () => {}),
-            ],
-          ),
+        child: Column(
+          children: [
+            Text('입력 방식 선택하기',
+                style: textTheme.heading.copyWith(
+                  color: colorTheme.contentStandardPrimary,
+                  fontWeight: FontWeight.bold,
+                )),
+            const SizedBox(height: CustomSpacing.spacing200),
+            Text('사용할 식재료를 입력할 방식을 선택해주세요.',
+                style: textTheme.footnote.copyWith(
+                  color: colorTheme.contentStandardTertiary,
+                )),
+            const Spacer(),
+            CustomButton(
+              text: '직접 입력하기',
+              icon: Icons.mode_edit_outline_outlined,
+              onTap: () => {},
+            ),
+            const SizedBox(height: CustomSpacing.spacing200),
+            CustomButton(
+                text: '사진으로 입력하기',
+                icon: Icons.camera_alt_outlined,
+                onTap: () => {}),
+            const SizedBox(height: CustomSpacing.spacing550),
+          ],
         ),
       );
     },
