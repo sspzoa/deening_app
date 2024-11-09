@@ -6,7 +6,7 @@ import '../core/theme/typography.dart';
 import '../widgets/gestureDetector.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
-  final String title;
+  final String? title;
   final List<Widget>? actions;
   final bool hasBackButton;
   final VoidCallback? onBackPressed;
@@ -14,7 +14,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   const CustomAppBar({
     super.key,
-    required this.title,
+    this.title,
     this.actions,
     this.hasBackButton = true,
     this.onBackPressed,
@@ -38,7 +38,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
             )
           : null,
       title: Text(
-        title,
+        title ?? '',
         style: textTheme.heading.copyWith(
           color: colorTheme.contentStandardPrimary,
           fontWeight: FontWeight.bold,

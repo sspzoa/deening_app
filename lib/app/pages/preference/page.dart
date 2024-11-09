@@ -150,12 +150,12 @@ class PreferenceTypeSlider extends StatelessWidget {
   final CustomTypography textTheme;
 
   const PreferenceTypeSlider({
-    Key? key,
+    super.key,
     required this.selectedIndex,
     required this.onChanged,
     required this.colorTheme,
     required this.textTheme,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -211,11 +211,11 @@ class KeywordsList extends StatelessWidget {
   final CustomTypography textTheme;
 
   const KeywordsList({
-    Key? key,
+    super.key,
     required this.keywords,
     required this.colorTheme,
     required this.textTheme,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

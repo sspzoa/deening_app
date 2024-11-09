@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../core/theme/colors.dart';
+import '../../widgets/appBar.dart';
 import 'controller.dart';
 
 class FindRecipePage extends GetView<FindRecipePageController> {
@@ -13,10 +14,14 @@ class FindRecipePage extends GetView<FindRecipePageController> {
     final colorTheme = Theme.of(context).extension<CustomColors>()!;
     final textTheme = Theme.of(context).extension<CustomTypography>()!;
     return const Scaffold(
+      appBar: CustomAppBar(
+        title: '레시피 찾아보기',
+      ),
       body: SafeArea(
-          child: Center(
-        child: Text('This is Find Recipe Page.'),
-      )),
+        child: Center(
+          child: Text('This is Find Recipe Page.'),
+        ),
+      ),
     );
   }
 }
