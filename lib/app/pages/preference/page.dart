@@ -100,7 +100,7 @@ void _showAddKeywordModal(
               controller: controller.keywordController,
               decoration: InputDecoration(
                 hintText: '키워드를 입력하세요',
-                hintStyle: textTheme.body.copyWith(
+                hintStyle: textTheme.label.copyWith(
                   color: colorTheme.contentStandardTertiary,
                 ),
                 filled: true,
@@ -122,7 +122,7 @@ void _showAddKeywordModal(
                   vertical: CustomSpacing.spacing300,
                 ),
               ),
-              style: textTheme.body.copyWith(
+              style: textTheme.label.copyWith(
                 color: colorTheme.contentStandardPrimary,
               ),
             ),

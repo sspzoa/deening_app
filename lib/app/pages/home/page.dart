@@ -42,6 +42,15 @@ class HomePage extends GetView<HomePageController> {
                 ],
               ),
               const Spacer(),
+              CustomGestureDetectorWithOpacityInteraction(
+                onTap: () => {Get.toNamed(Routes.LICENSE)},
+                child: Text(
+                  'Open Source License',
+                  style: textTheme.label
+                      .copyWith(color: colorTheme.contentStandardTertiary),
+                ),
+              ),
+              const SizedBox(height: CustomSpacing.spacing200),
               Text('© 2024 sspzoa. All rights reserved.',
                   style: textTheme.label
                       .copyWith(color: colorTheme.contentStandardTertiary)),
