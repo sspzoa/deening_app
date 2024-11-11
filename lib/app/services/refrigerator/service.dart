@@ -32,4 +32,8 @@ class RefrigeratorService extends GetxController {
     await repository.updateIngredients(
         ingredientId: ingredientId, ingredient: ingredient);
   }
+
+  Future<RefrigeratorResponse> rearrangeRefrigerator() async {
+    return await repository.rearrangeRefrigerator();
+  }
 }

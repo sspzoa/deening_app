@@ -1,68 +1,96 @@
 import 'package:get/get.dart';
 
-class Ingredient {
-  final String name;
-  final String amount;
-  final String category;
-
-  Ingredient({
-    required this.name,
-    required this.amount,
-    required this.category,
-  });
-}
+import '../../services/refrigerator/model.dart';
+import '../../services/refrigerator/service.dart';
 
 class RefrigeratorPageController extends GetxController {
-  // 0: 냉장보관, 1: 냉동보관, 2: 상온 보관
+  final RefrigeratorService _service = Get.find<RefrigeratorService>();
+
   final selectedStorageIndex = 0.obs;
-
-  final refrigeratedItems = <String, List<Ingredient>>{
-    '해산물': [
-      Ingredient(name: '연어', amount: '300g', category: '해산물'),
-      Ingredient(name: '새우', amount: '200g', category: '해산물'),
-    ],
-    '육류': [
-      Ingredient(name: '돼지고기', amount: '500g', category: '육류'),
-      Ingredient(name: '닭고기', amount: '400g', category: '육류'),
-    ],
-    '채소': [
-      Ingredient(name: '양파', amount: '3개', category: '채소'),
-      Ingredient(name: '당근', amount: '2개', category: '채소'),
-    ],
-  }.obs;
-
-  final frozenItems = <String, List<Ingredient>>{
-    '해산물': [
-      Ingredient(name: '고등어', amount: '2마리', category: '해산물'),
-      Ingredient(name: '오징어', amount: '3마리', category: '해산물'),
-    ],
-    '육류': [
-      Ingredient(name: '소고기', amount: '1kg', category: '육류'),
-      Ingredient(name: '양고기', amount: '500g', category: '육류'),
-    ],
-  }.obs;
-
-  final roomTempItems = <String, List<Ingredient>>{
-    '조미료': [
-      Ingredient(name: '소금', amount: '500g', category: '조미료'),
-      Ingredient(name: '설탕', amount: '1kg', category: '조미료'),
-    ],
-    '곡물': [
-      Ingredient(name: '쌀', amount: '5kg', category: '곡물'),
-      Ingredient(name: '밀가루', amount: '1kg', category: '곡물'),
-    ],
-  }.obs;
+  final _items = Rxn<Map<String, List<Ingredient>>>();
 
   Map<String, List<Ingredient>> get currentItems {
+    if (_items.value == null) return {};
+
+    var filteredItems = <String, List<Ingredient>>{};
+    StorageType targetType;
+
     switch (selectedStorageIndex.value) {
       case 0:
-        return refrigeratedItems;
+        targetType = StorageType.refrigerated;
+        break;
       case 1:
-        return frozenItems;
+        targetType = StorageType.frozen;
+        break;
       case 2:
-        return roomTempItems;
+        targetType = StorageType.roomTemp;
+        break;
       default:
         return {};
     }
+
+    _items.value!.forEach((category, ingredients) {
+      final filteredIngredients = ingredients
+          .where((ingredient) => ingredient.storageType == targetType)
+          .toList();
+      if (filteredIngredients.isNotEmpty) {
+        filteredItems[category] = filteredIngredients;
+      }
+    });
+
+    return filteredItems;
+  }
+
+  StorageType get currentStorageType {
+    switch (selectedStorageIndex.value) {
+      case 0:
+        return StorageType.refrigerated;
+      case 1:
+        return StorageType.frozen;
+      case 2:
+        return StorageType.roomTemp;
+      default:
+        return StorageType.refrigerated;
+    }
+  }
+
+  @override
+  void onInit() {
+    super.onInit();
+    fetchIngredients();
+  }
+
+  Future<void> fetchIngredients() async {
+    final response = await _service.getIngredients();
+    final categorizedItems = <String, List<Ingredient>>{};
+
+    for (var category in response.refrigerator.categories) {
+      categorizedItems[category.category] = category.ingredients;
+    }
+
+    _items.value = categorizedItems;
+  }
+
+  Future<void> refreshIngredients() async {
+    await fetchIngredients();
+  }
+
+  Future<void> updateIngredient(
+      String ingredientId, NewIngredient ingredient) async {
+    await _service.updateIngredients(
+      ingredientId: ingredientId,
+      ingredient: ingredient,
+    );
+    await refreshIngredients();
+  }
+
+  Future<void> deleteIngredient(String ingredientId) async {
+    await _service.deleteIngredients(ingredientId: ingredientId);
+    await refreshIngredients();
+  }
+
+  Future<void> addIngredients(List<NewIngredient> ingredients) async {
+    await _service.addIngredients(ingredients: ingredients);
+    await refreshIngredients();
   }
 }

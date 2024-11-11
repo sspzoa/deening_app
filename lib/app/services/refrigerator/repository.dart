@@ -39,24 +39,28 @@ class RefrigeratorRepository {
     return refrigerator;
   }
 
-  Future<void> addIngredients(
-      {required List<NewIngredient> ingredients}) async {
+  Future<void> addIngredients({
+    required List<NewIngredient> ingredients,
+  }) async {
     String url = '/refrigerator/ingredients';
 
-    await api.put(url, data: {ingredients: ingredients});
+    final List<Map<String, dynamic>> ingredientsData =
+        ingredients.map((ingredient) => ingredient.toJson()).toList();
+
+    await api.put(url, data: {'ingredients': ingredientsData});
   }
 
   Future<void> deleteIngredients({required String ingredientId}) async {
-    String url = '/refrigerator/ingredients/$ingredientId';
+    String url = '/refrigerator/ingredient/$ingredientId';
 
     await api.delete(url);
   }
 
   Future<void> updateIngredients(
       {required String ingredientId, required NewIngredient ingredient}) async {
-    String url = '/refrigerator/ingredients/$ingredientId';
+    String url = '/refrigerator/ingredient/$ingredientId';
 
-    await api.patch(url, data: ingredient);
+    await api.patch(url, data: ingredient.toJson());
   }
 
   Future<RefrigeratorResponse> rearrangeRefrigerator() async {

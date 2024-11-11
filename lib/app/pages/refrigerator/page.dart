@@ -1,11 +1,13 @@
-import 'package:deening_app/app/widgets/button.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../core/theme/colors.dart';
 import '../../core/theme/static.dart';
 import '../../core/theme/typography.dart';
+import '../../routes/routes.dart';
+import '../../services/refrigerator/model.dart';
 import '../../widgets/appBar.dart';
+import '../../widgets/button.dart';
 import '../../widgets/gestureDetector.dart';
 import 'controller.dart';
 
@@ -47,27 +49,39 @@ class RefrigeratorPage extends GetView<RefrigeratorPageController> {
         ],
       ),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(CustomSpacing.spacing550,
-              CustomSpacing.spacing550, CustomSpacing.spacing550, 0),
-          child: Column(
-            children: [
-              Obx(() => StorageTypeSlider(
+        child: RefreshIndicator(
+          onRefresh: controller.refreshIngredients,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(
+              CustomSpacing.spacing550,
+              CustomSpacing.spacing550,
+              CustomSpacing.spacing550,
+              0,
+            ),
+            child: Column(
+              children: [
+                Obx(
+                  () => StorageTypeSlider(
                     selectedIndex: controller.selectedStorageIndex.value,
                     onChanged: (index) =>
                         controller.selectedStorageIndex.value = index,
                     colorTheme: colorTheme,
                     textTheme: textTheme,
-                  )),
-              const SizedBox(height: CustomSpacing.spacing700),
-              Expanded(
-                child: Obx(() => IngredientsList(
+                  ),
+                ),
+                const SizedBox(height: CustomSpacing.spacing700),
+                Expanded(
+                  child: Obx(
+                    () => IngredientsList(
                       items: controller.currentItems,
                       colorTheme: colorTheme,
                       textTheme: textTheme,
-                    )),
-              ),
-            ],
+                      controller: controller,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -93,27 +107,32 @@ void _showAddIngredientModal(
         width: double.infinity,
         child: Column(
           children: [
-            Text('입력 방식 선택하기',
-                style: textTheme.heading.copyWith(
-                  color: colorTheme.contentStandardPrimary,
-                  fontWeight: FontWeight.bold,
-                )),
+            Text(
+              '입력 방식 선택하기',
+              style: textTheme.heading.copyWith(
+                color: colorTheme.contentStandardPrimary,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             const SizedBox(height: CustomSpacing.spacing200),
-            Text('사용할 식재료를 입력할 방식을 선택해주세요.',
-                style: textTheme.footnote.copyWith(
-                  color: colorTheme.contentStandardTertiary,
-                )),
+            Text(
+              '사용할 식재료를 입력할 방식을 선택해주세요.',
+              style: textTheme.footnote.copyWith(
+                color: colorTheme.contentStandardTertiary,
+              ),
+            ),
             const Spacer(),
             CustomButton(
               text: '직접 입력하기',
               icon: Icons.mode_edit_outline_outlined,
-              onTap: () => {},
+              onTap: () => {Get.back(), Get.toNamed(Routes.ADD_INGREDIENTS)},
             ),
             const SizedBox(height: CustomSpacing.spacing200),
             CustomButton(
-                text: '사진으로 입력하기',
-                icon: Icons.camera_alt_outlined,
-                onTap: () => {}),
+              text: '사진으로 입력하기',
+              icon: Icons.camera_alt_outlined,
+              onTap: () => {},
+            ),
             const SizedBox(height: CustomSpacing.spacing550),
           ],
         ),
@@ -129,12 +148,12 @@ class StorageTypeSlider extends StatelessWidget {
   final CustomTypography textTheme;
 
   const StorageTypeSlider({
-    Key? key,
+    super.key,
     required this.selectedIndex,
     required this.onChanged,
     required this.colorTheme,
     required this.textTheme,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -147,38 +166,41 @@ class StorageTypeSlider extends StatelessWidget {
       ),
       padding: const EdgeInsets.all(CustomSpacing.spacing100),
       child: Row(
-        children: List.generate(storageTypes.length, (index) {
-          final isSelected = selectedIndex == index;
-          return Expanded(
-            child: CustomGestureDetectorWithOpacityInteraction(
-              onTap: () => onChanged(index),
-              child: Container(
-                margin: EdgeInsets.only(
-                  left: index == 0 ? 0 : CustomSpacing.spacing100,
-                ),
-                decoration: BoxDecoration(
-                  color: isSelected
-                      ? colorTheme.backgroundStandardPrimary
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.circular(CustomRadius.radius300),
-                ),
-                height: 40,
-                child: Center(
-                  child: Text(
-                    storageTypes[index],
-                    style: textTheme.label.copyWith(
-                      color: isSelected
-                          ? colorTheme.contentStandardPrimary
-                          : colorTheme.contentStandardQuaternary,
-                      fontWeight:
-                          isSelected ? FontWeight.bold : FontWeight.normal,
+        children: List.generate(
+          storageTypes.length,
+          (index) {
+            final isSelected = selectedIndex == index;
+            return Expanded(
+              child: CustomGestureDetectorWithOpacityInteraction(
+                onTap: () => onChanged(index),
+                child: Container(
+                  margin: EdgeInsets.only(
+                    left: index == 0 ? 0 : CustomSpacing.spacing100,
+                  ),
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? colorTheme.backgroundStandardPrimary
+                        : Colors.transparent,
+                    borderRadius: BorderRadius.circular(CustomRadius.radius300),
+                  ),
+                  height: 40,
+                  child: Center(
+                    child: Text(
+                      storageTypes[index],
+                      style: textTheme.label.copyWith(
+                        color: isSelected
+                            ? colorTheme.contentStandardPrimary
+                            : colorTheme.contentStandardQuaternary,
+                        fontWeight:
+                            isSelected ? FontWeight.bold : FontWeight.normal,
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-          );
-        }),
+            );
+          },
+        ),
       ),
     );
   }
@@ -188,23 +210,22 @@ class IngredientsList extends StatelessWidget {
   final Map<String, List<Ingredient>> items;
   final CustomColors colorTheme;
   final CustomTypography textTheme;
+  final RefrigeratorPageController controller;
 
   const IngredientsList({
-    Key? key,
+    super.key,
     required this.items,
     required this.colorTheme,
     required this.textTheme,
-  }) : super(key: key);
+    required this.controller,
+  });
 
   @override
   Widget build(BuildContext context) {
     if (items.isEmpty) {
       return Center(
-        child: Text(
-          '재료가 없습니다',
-          style: textTheme.body.copyWith(
-            color: colorTheme.contentStandardTertiary,
-          ),
+        child: CircularProgressIndicator(
+          valueColor: AlwaysStoppedAnimation(colorTheme.coreAccent),
         ),
       );
     }
@@ -238,10 +259,12 @@ class IngredientsList extends StatelessWidget {
               itemBuilder: (context, index) {
                 final item = categoryItems[index];
                 return IngredientItem(
-                  name: item.name,
-                  amount: item.amount,
+                  ingredient: item,
                   colorTheme: colorTheme,
                   textTheme: textTheme,
+                  onEdit: (newIngredient) =>
+                      controller.updateIngredient(item.id, newIngredient),
+                  onDelete: () => controller.deleteIngredient(item.id),
                 );
               },
             ),
@@ -253,18 +276,20 @@ class IngredientsList extends StatelessWidget {
 }
 
 class IngredientItem extends StatelessWidget {
-  final String name;
-  final String amount;
+  final Ingredient ingredient;
   final CustomColors colorTheme;
   final CustomTypography textTheme;
+  final Function(NewIngredient) onEdit;
+  final Function() onDelete;
 
   const IngredientItem({
-    Key? key,
-    required this.name,
-    required this.amount,
+    super.key,
+    required this.ingredient,
     required this.colorTheme,
     required this.textTheme,
-  }) : super(key: key);
+    required this.onEdit,
+    required this.onDelete,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -289,13 +314,13 @@ class IngredientItem extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Text(
-                    name,
+                    ingredient.name,
                     style: textTheme.label.copyWith(
                       color: colorTheme.contentStandardPrimary,
                     ),
                   ),
                   Text(
-                    amount,
+                    '${ingredient.amount}${ingredient.unit}',
                     style: textTheme.label.copyWith(
                       color: colorTheme.coreAccent,
                     ),
@@ -306,28 +331,310 @@ class IngredientItem extends StatelessWidget {
           ),
           const SizedBox(width: CustomSpacing.spacing100),
           CustomGestureDetectorWithOpacityInteraction(
-            onTap: () => {},
-            child: CustomGestureDetectorWithScaleInteraction(
-              onTap: () => {},
-              child: Container(
-                decoration: BoxDecoration(
-                  color: colorTheme.coreAccentTranslucent,
-                  borderRadius: BorderRadius.circular(CustomRadius.radius300),
-                  border: Border.all(
-                    color: colorTheme.lineOutline,
-                  ),
+            onTap: () => _showEditDialog(context),
+            child: Container(
+              decoration: BoxDecoration(
+                color: colorTheme.coreAccentTranslucent,
+                borderRadius: BorderRadius.circular(CustomRadius.radius300),
+                border: Border.all(
+                  color: colorTheme.lineOutline,
                 ),
-                padding: const EdgeInsets.all(CustomSpacing.spacing200),
-                child: Center(
-                  child: Icon(
-                    Icons.edit_rounded,
-                    color: colorTheme.contentStandardTertiary,
-                  ),
+              ),
+              padding: const EdgeInsets.all(CustomSpacing.spacing200),
+              child: Center(
+                child: Icon(
+                  Icons.edit_rounded,
+                  color: colorTheme.contentStandardTertiary,
                 ),
               ),
             ),
           )
         ],
+      ),
+    );
+  }
+
+  void _showEditDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => IngredientEditDialog(
+        ingredient: ingredient,
+        onEdit: onEdit,
+        onDelete: onDelete,
+        colorTheme: colorTheme,
+        textTheme: textTheme,
+      ),
+    );
+  }
+}
+
+class IngredientEditDialog extends StatefulWidget {
+  final Ingredient ingredient;
+  final Function(NewIngredient) onEdit;
+  final Function() onDelete;
+  final CustomColors colorTheme;
+  final CustomTypography textTheme;
+
+  const IngredientEditDialog({
+    super.key,
+    required this.ingredient,
+    required this.onEdit,
+    required this.onDelete,
+    required this.colorTheme,
+    required this.textTheme,
+  });
+
+  @override
+  State<IngredientEditDialog> createState() => _IngredientEditDialogState();
+}
+
+class _IngredientEditDialogState extends State<IngredientEditDialog> {
+  late TextEditingController _nameController;
+  late TextEditingController _amountController;
+  late TextEditingController _unitController;
+  late String _selectedCategory;
+  late StorageType _selectedStorageType;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController(text: widget.ingredient.name);
+    _amountController =
+        TextEditingController(text: widget.ingredient.amount.toString());
+    _unitController = TextEditingController(text: widget.ingredient.unit);
+    _selectedCategory = widget.ingredient.category;
+    _selectedStorageType = widget.ingredient.storageType;
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _amountController.dispose();
+    _unitController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      backgroundColor: widget.colorTheme.backgroundStandardPrimary,
+      child: Container(
+        padding: const EdgeInsets.all(CustomSpacing.spacing550),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              '재료 수정하기',
+              style: widget.textTheme.heading.copyWith(
+                color: widget.colorTheme.contentStandardPrimary,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: CustomSpacing.spacing550),
+            _buildTextField(
+              controller: _nameController,
+              label: '재료명',
+            ),
+            const SizedBox(height: CustomSpacing.spacing300),
+            Row(
+              children: [
+                Expanded(
+                  flex: 2,
+                  child: _buildTextField(
+                    controller: _amountController,
+                    label: '수량',
+                    keyboardType: TextInputType.number,
+                  ),
+                ),
+                const SizedBox(width: CustomSpacing.spacing300),
+                Expanded(
+                  child: _buildTextField(
+                    controller: _unitController,
+                    label: '단위',
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: CustomSpacing.spacing300),
+            _buildStorageTypeSelector(),
+            const SizedBox(height: CustomSpacing.spacing550),
+            Row(
+              children: [
+                Expanded(
+                  child: CustomButton(
+                    text: '삭제하기',
+                    onTap: () {
+                      Get.back();
+                      _showDeleteConfirmationDialog();
+                    },
+                  ),
+                ),
+                const SizedBox(width: CustomSpacing.spacing300),
+                Expanded(
+                  child: CustomButton(
+                    text: '수정하기',
+                    onTap: _handleEdit,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    TextInputType? keyboardType,
+  }) {
+    return TextField(
+      controller: controller,
+      keyboardType: keyboardType,
+      style: widget.textTheme.body.copyWith(
+        color: widget.colorTheme.contentStandardPrimary,
+      ),
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: widget.textTheme.footnote.copyWith(
+          color: widget.colorTheme.contentStandardTertiary,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: widget.colorTheme.lineOutline),
+          borderRadius: BorderRadius.circular(CustomRadius.radius300),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: widget.colorTheme.coreAccent),
+          borderRadius: BorderRadius.circular(CustomRadius.radius300),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStorageTypeSelector() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          '보관 방법',
+          style: widget.textTheme.footnote.copyWith(
+            color: widget.colorTheme.contentStandardTertiary,
+          ),
+        ),
+        const SizedBox(height: CustomSpacing.spacing200),
+        Container(
+          decoration: BoxDecoration(
+            border: Border.all(color: widget.colorTheme.lineOutline),
+            borderRadius: BorderRadius.circular(CustomRadius.radius300),
+          ),
+          padding: const EdgeInsets.all(CustomSpacing.spacing200),
+          child: Row(
+            children: StorageType.values.map((type) {
+              final isSelected = type == _selectedStorageType;
+              String label;
+              switch (type) {
+                case StorageType.refrigerated:
+                  label = '냉장';
+                  break;
+                case StorageType.frozen:
+                  label = '냉동';
+                  break;
+                case StorageType.roomTemp:
+                  label = '상온';
+                  break;
+              }
+              return Expanded(
+                child: GestureDetector(
+                  onTap: () => setState(() => _selectedStorageType = type),
+                  child: Container(
+                    padding: const EdgeInsets.all(CustomSpacing.spacing200),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? widget.colorTheme.coreAccent
+                          : Colors.transparent,
+                      borderRadius:
+                          BorderRadius.circular(CustomRadius.radius200),
+                    ),
+                    child: Center(
+                      child: Text(
+                        label,
+                        style: widget.textTheme.label.copyWith(
+                          color: isSelected
+                              ? widget.colorTheme.backgroundStandardPrimary
+                              : widget.colorTheme.contentStandardPrimary,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _handleEdit() {
+    final newIngredient = NewIngredient(
+      name: _nameController.text,
+      amount: double.parse(_amountController.text),
+      unit: _unitController.text,
+      category: _selectedCategory,
+      storageType: _selectedStorageType,
+    );
+    Get.back();
+    widget.onEdit(newIngredient);
+  }
+
+  void _showDeleteConfirmationDialog() {
+    Get.dialog(
+      Dialog(
+        backgroundColor: widget.colorTheme.backgroundStandardPrimary,
+        child: Container(
+          padding: const EdgeInsets.all(CustomSpacing.spacing550),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                '재료를 삭제하시겠습니까?',
+                style: widget.textTheme.heading.copyWith(
+                  color: widget.colorTheme.contentStandardPrimary,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: CustomSpacing.spacing200),
+              Text(
+                '삭제된 재료는 복구할 수 없습니다.',
+                style: widget.textTheme.footnote.copyWith(
+                  color: widget.colorTheme.contentStandardTertiary,
+                ),
+              ),
+              const SizedBox(height: CustomSpacing.spacing550),
+              Row(
+                children: [
+                  Expanded(
+                    child: CustomButton(
+                      text: '취소',
+                      onTap: () => Get.back(),
+                    ),
+                  ),
+                  const SizedBox(width: CustomSpacing.spacing300),
+                  Expanded(
+                    child: CustomButton(
+                      text: '삭제',
+                      onTap: () {
+                        Get.back();
+                        widget.onDelete();
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
