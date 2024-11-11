@@ -5,6 +5,7 @@ class Routes {
   static const LICENSE = '/license';
   static const HOME = '/';
   static const REFRIGERATOR = '/refrigerator';
+  static const ADD_INGREDIENTS = '/add_ingredients';
   static const PREFERENCE = '/preference';
   static const SEARCH_RESULT = '/search_result';
   static const FIND_RECIPE = '/find_recipe';

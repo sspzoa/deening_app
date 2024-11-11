@@ -138,7 +138,7 @@ class IngredientsButton extends StatelessWidget {
         child: Container(
           height: 80,
           decoration: BoxDecoration(
-            color: colorTheme.solidTranslucentIndigo,
+            color: colorTheme.coreAccentTranslucent,
             borderRadius: BorderRadius.circular(CustomRadius.radius300),
             border: Border.all(
               color: colorTheme.lineOutline,
@@ -185,7 +185,7 @@ class PreferenceButton extends StatelessWidget {
         child: Container(
           height: 80,
           decoration: BoxDecoration(
-            color: colorTheme.solidTranslucentGreen,
+            color: colorTheme.coreAccentTranslucent,
             borderRadius: BorderRadius.circular(CustomRadius.radius300),
             border: Border.all(
               color: colorTheme.lineOutline,

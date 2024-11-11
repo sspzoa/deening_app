@@ -1,8 +1,10 @@
+import 'package:deening_app/app/pages/add_ingredients/page.dart';
 import 'package:deening_app/app/pages/refrigerator/page.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_navigation/src/routes/get_route.dart';
 import 'package:get/get_navigation/src/routes/transitions_type.dart';
 
+import '../pages/add_ingredients/binding.dart';
 import '../pages/chat/binding.dart';
 import '../pages/chat/page.dart';
 import '../pages/find_recipe/binding.dart';
@@ -45,6 +47,11 @@ class AppPages {
       binding: RefrigeratorPageBinding(),
       transition: Transition.cupertino,
     ),
+    GetPage(
+        name: Routes.ADD_INGREDIENTS,
+        page: () => AddIngredientsPage(),
+        binding: AddIngredientsPageBinding(),
+        transition: Transition.cupertino),
     GetPage(
       name: Routes.PREFERENCE,
       page: () => const PreferencePage(),

@@ -38,6 +38,7 @@ class TestPage extends GetView<TestPageController> {
           linkToRoute('/license'),
           linkToRoute('/'),
           linkToRoute('/refrigerator'),
+          linkToRoute('/add_ingredients'),
           linkToRoute('/preference'),
           linkToRoute('/search_result'),
           linkToRoute('/find_recipe'),
