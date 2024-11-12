@@ -1,12 +1,13 @@
 import 'package:deening_app/app/core/theme/static.dart';
 import 'package:deening_app/app/core/theme/typography.dart';
 import 'package:deening_app/app/widgets/button.dart';
-import 'package:deening_app/app/widgets/gestureDetector.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../core/theme/colors.dart';
+import '../../routes/routes.dart';
 import '../../widgets/appBar.dart';
+import '../../widgets/gestureDetector.dart';
 import 'controller.dart';
 
 class SearchResultPage extends GetView<SearchResultPageController> {
@@ -27,40 +28,44 @@ class SearchResultPage extends GetView<SearchResultPageController> {
             children: [
               CustomButton(
                 text: "새로운 레시피 찾아보기",
-                onTap: () => {},
+                onTap: () => Get.toNamed(Routes.FIND_RECIPE),
               ),
               const SizedBox(height: CustomSpacing.spacing400),
               Expanded(
-                child: SingleChildScrollView(
-                  physics: const BouncingScrollPhysics(),
-                  child: Column(
-                    children: [
-                      RecipeCard(
-                        imageBase64: controller.base64,
-                        title: '오므라이스',
-                        colorTheme: colorTheme,
-                        textTheme: textTheme,
-                        onTap: () => {},
+                child: Obx(() {
+                  if (controller.isLoading.value) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  if (controller.searchResults.isEmpty) {
+                    return Center(
+                      child: Text(
+                        '검색 결과가 없습니다',
+                        style: textTheme.body,
                       ),
-                      const SizedBox(height: CustomSpacing.spacing400),
-                      RecipeCard(
-                        imageBase64: controller.base64,
-                        title: '오므라이스',
-                        colorTheme: colorTheme,
-                        textTheme: textTheme,
-                        onTap: () => {},
-                      ),
-                      const SizedBox(height: CustomSpacing.spacing400),
-                      RecipeCard(
-                        imageBase64: controller.base64,
-                        title: '오므라이스',
-                        colorTheme: colorTheme,
-                        textTheme: textTheme,
-                        onTap: () => {},
-                      ),
-                    ],
-                  ),
-                ),
+                    );
+                  }
+
+                  return SingleChildScrollView(
+                    physics: const BouncingScrollPhysics(),
+                    child: Column(
+                      children: controller.searchResults.map((recipe) {
+                        return Column(
+                          children: [
+                            RecipeCard(
+                              imageBase64: recipe.imageBase64,
+                              title: recipe.name,
+                              colorTheme: colorTheme,
+                              textTheme: textTheme,
+                              onTap: () => controller.onRecipeTap(recipe.name),
+                            ),
+                            const SizedBox(height: CustomSpacing.spacing400),
+                          ],
+                        );
+                      }).toList(),
+                    ),
+                  );
+                }),
               ),
             ],
           ),

@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import '../../core/theme/colors.dart';
 import '../../core/theme/static.dart';
 import '../../core/theme/typography.dart';
+import '../../services/recipe/model.dart';
 import '../../widgets/appBar.dart';
 import '../../widgets/gestureDetector.dart';
 import 'controller.dart';
@@ -19,23 +20,57 @@ class RecipePage extends GetView<RecipePageController> {
     return Scaffold(
       appBar: const CustomAppBar(),
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              _RecipeHeader(controller: controller, colorTheme: colorTheme),
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: CustomSpacing.spacing550,
-                  vertical: CustomSpacing.spacing700,
-                ),
-                child: _RecipeContent(
-                  colorTheme: colorTheme,
-                  textTheme: textTheme,
-                  controller: controller,
-                ),
+        child: Obx(() {
+          if (controller.isLoading.value) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (controller.errorMessage.value.isNotEmpty) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(controller.errorMessage.value),
+                  ElevatedButton(
+                    onPressed: controller.loadRecipe,
+                    child: const Text('다시 시도'),
+                  ),
+                ],
               ),
-            ],
-          ),
+            );
+          }
+
+          if (controller.recipe.value == null) {
+            return const Center(child: Text('레시피 정보가 없습니다.'));
+          }
+
+          return SingleChildScrollView(
+            child: Column(
+              children: [
+                _RecipeHeader(controller: controller, colorTheme: colorTheme),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: CustomSpacing.spacing550,
+                    vertical: CustomSpacing.spacing700,
+                  ),
+                  child: _RecipeContent(
+                    colorTheme: colorTheme,
+                    textTheme: textTheme,
+                    controller: controller,
+                  ),
+                ),
+              ],
+            ),
+          );
+        }),
+      ),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: colorTheme.coreAccent,
+        onPressed: controller.chatButtonTap,
+        child: Image.asset(
+          'assets/images/chef_logo.png',
+          width: 24,
+          height: 24,
         ),
       ),
     );
@@ -99,25 +134,27 @@ class _RecipeContent extends StatelessWidget {
   }
 
   Widget _buildTitleSection() {
+    final recipe = controller.recipe.value!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
-            Text(
-              '해물 짬뽕',
-              style: textTheme.title.copyWith(
-                color: colorTheme.contentStandardPrimary,
-                fontWeight: FontWeight.bold,
+            Expanded(
+              child: Text(
+                recipe.name,
+                style: textTheme.title.copyWith(
+                  color: colorTheme.contentStandardPrimary,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
-            const Spacer(),
-            _buildCookingTime(),
+            _buildCookingTime(recipe.cookTime),
           ],
         ),
         const SizedBox(height: CustomSpacing.spacing400),
         Text(
-          '매콤하고 깊은 해물의 맛이 일품인 한국식 해물 짬뽕입니다.',
+          recipe.description,
           style: textTheme.body.copyWith(
             color: colorTheme.contentStandardSecondary,
           ),
@@ -126,14 +163,14 @@ class _RecipeContent extends StatelessWidget {
     );
   }
 
-  Widget _buildCookingTime() {
+  Widget _buildCookingTime(String cookTime) {
     return Row(
       children: [
         Icon(Icons.schedule_rounded,
             color: colorTheme.contentStandardSecondary),
         const SizedBox(width: CustomSpacing.spacing150),
         Text(
-          '15분',
+          cookTime,
           style: textTheme.body.copyWith(
             color: colorTheme.contentStandardSecondary,
           ),
@@ -153,11 +190,12 @@ class _RecipeContent extends StatelessWidget {
   }
 
   Widget _buildNutritionSection() {
+    final nutrition = controller.recipe.value!.nutrition;
     final nutritionItems = [
-      NutritionItem('carbs', '탄수화물 800g'),
-      NutritionItem('proteins', '단백질 35g'),
-      NutritionItem('fats', '지방 15g'),
-      NutritionItem('calories', '600kcal'),
+      NutritionItem('carbs', '탄수화물 ${nutrition.carbohydrates}'),
+      NutritionItem('proteins', '단백질 ${nutrition.protein}'),
+      NutritionItem('fats', '지방 ${nutrition.fat}'),
+      NutritionItem('calories', '${nutrition.calories}kcal'),
     ];
 
     return Column(
@@ -229,200 +267,225 @@ class _RecipeContent extends StatelessWidget {
   }
 
   Widget _buildIngredientsList() {
-    final ingredients = [
-      IngredientItem('오징어', '1마리', false),
-      IngredientItem('바지락', '100g', true),
-      IngredientItem('문어', '1마리', false),
-    ];
-
-    return Column(
-      children: ingredients.map((item) {
-        return Column(
-          children: [
-            _buildIngredientItem(item),
-            const SizedBox(height: CustomSpacing.spacing200),
-          ],
+    return Obx(() {
+      final ingredients =
+          controller.recipe.value!.ingredients.map((ingredient) {
+        return IngredientItem(
+          ingredient.name,
+          '${ingredient.amount}${ingredient.unit}',
+          controller.expandedIngredients[ingredient.name] ?? false,
         );
-      }).toList(),
-    );
+      }).toList();
+
+      return Column(
+        children: ingredients.map((item) {
+          return Column(
+            children: [
+              _buildIngredientItem(item),
+              const SizedBox(height: CustomSpacing.spacing200),
+            ],
+          );
+        }).toList(),
+      );
+    });
+  }
+
+  Widget _buildReplaceButton(IngredientItem item, {bool isExpanded = false}) {
+    return Obx(() {
+      final isReplacing = controller.replacingIngredients[item.name] ?? false;
+
+      return CustomGestureDetectorWithOpacityInteraction(
+        onTap:
+            isReplacing ? null : () => controller.replaceIngredient(item.name),
+        child: Container(
+          width: isExpanded ? double.infinity : null,
+          decoration: _getReplaceButtonDecoration(),
+          padding: const EdgeInsets.all(CustomSpacing.spacing200),
+          child: isReplacing
+              ? Row(
+                  mainAxisAlignment: isExpanded
+                      ? MainAxisAlignment.center
+                      : MainAxisAlignment.start,
+                  children: [
+                    SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          colorTheme.contentStandardTertiary,
+                        ),
+                      ),
+                    ),
+                  ],
+                )
+              : Row(
+                  mainAxisAlignment: isExpanded
+                      ? MainAxisAlignment.center
+                      : MainAxisAlignment.start,
+                  children: [
+                    Icon(
+                      Icons.restart_alt_rounded,
+                      color: colorTheme.contentStandardTertiary,
+                    ),
+                    if (isExpanded) ...[
+                      const SizedBox(width: CustomSpacing.spacing200),
+                      Text(
+                        '다른 식재료로 바꾸기',
+                        style: textTheme.label.copyWith(
+                          color: colorTheme.contentStandardSecondary,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+        ),
+      );
+    });
   }
 
   Widget _buildIngredientItem(IngredientItem item) {
     if (item.hasDetails) {
-      return _buildDetailedIngredientItem(item);
-    }
-    return _buildSimpleIngredientItem(item);
-  }
-
-  Widget _buildSimpleIngredientItem(IngredientItem item) {
-    return IntrinsicHeight(
-      child: Row(
+      return Column(
         children: [
-          Expanded(
+          CustomGestureDetectorWithScaleInteraction(
+            onTap: () => controller.toggleIngredientDetails(item.name),
             child: Container(
               decoration: _getIngredientContainerDecoration(),
               padding: const EdgeInsets.symmetric(
                 horizontal: CustomSpacing.spacing300,
                 vertical: CustomSpacing.spacing200,
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              child: Column(
                 children: [
-                  Text(
-                    item.name,
-                    style: textTheme.label.copyWith(
-                      color: colorTheme.contentStandardPrimary,
-                    ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        item.name,
+                        style: textTheme.label.copyWith(
+                          color: colorTheme.contentStandardPrimary,
+                        ),
+                      ),
+                      Text(
+                        item.quantity,
+                        style: textTheme.label.copyWith(
+                          color: colorTheme.coreAccent,
+                        ),
+                      ),
+                    ],
                   ),
-                  Text(
-                    item.quantity,
-                    style: textTheme.label.copyWith(
-                      color: colorTheme.coreAccent,
-                    ),
-                  ),
+                  const SizedBox(height: CustomSpacing.spacing200),
+                  _buildExpandedIngredientContent(item.name),
                 ],
               ),
             ),
           ),
-          const SizedBox(width: CustomSpacing.spacing100),
-          _buildReplaceButton(),
+          const SizedBox(height: CustomSpacing.spacing100),
+          _buildReplaceButton(item, isExpanded: true),
         ],
-      ),
-    );
-  }
-
-  Widget _buildDetailedIngredientItem(IngredientItem item) {
-    return IntrinsicHeight(
-      child: Column(
+      );
+    } else {
+      return Row(
         children: [
           Expanded(
-            child: Container(
-              decoration: _getIngredientContainerDecoration(),
-              padding: const EdgeInsets.symmetric(
-                horizontal: CustomSpacing.spacing300,
-                vertical: CustomSpacing.spacing200,
+            child: CustomGestureDetectorWithScaleInteraction(
+              onTap: () => controller.toggleIngredientDetails(item.name),
+              child: Container(
+                decoration: _getIngredientContainerDecoration(),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: CustomSpacing.spacing300,
+                  vertical: CustomSpacing.spacing200,
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      item.name,
+                      style: textTheme.label.copyWith(
+                        color: colorTheme.contentStandardPrimary,
+                      ),
+                    ),
+                    Text(
+                      item.quantity,
+                      style: textTheme.label.copyWith(
+                        color: colorTheme.coreAccent,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              child: _buildDetailedIngredientContent(item),
             ),
           ),
-          const SizedBox(height: CustomSpacing.spacing100),
-          _buildReplaceButtonWithLabel(),
+          const SizedBox(width: CustomSpacing.spacing100),
+          _buildReplaceButton(item),
         ],
-      ),
-    );
+      );
+    }
   }
 
-  Widget _buildDetailedIngredientContent(IngredientItem item) {
+  Widget _buildExpandedIngredientContent(String ingredientName) {
+    final details = controller.ingredientDetails[ingredientName];
+    final imageBase64 = controller.ingredientImages[ingredientName];
+    final replacementInfo = controller.replacementDetails[ingredientName];
+
+    if (details == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              item.name,
-              style: textTheme.label.copyWith(
-                color: colorTheme.contentStandardPrimary,
-              ),
-            ),
-            Text(
-              item.quantity,
-              style: textTheme.label.copyWith(
-                color: colorTheme.coreAccent,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: CustomSpacing.spacing200),
         Text(
-          '바지락은 조개류의 일종으로, 해산물 요리에 자주 사용됩니다. 단백질이 풍부하고 저지방 식품으로 건강한 식단에 적합한 식재료입니다.',
+          details.description,
           style: textTheme.footnote.copyWith(
             color: colorTheme.contentStandardSecondary,
           ),
         ),
-        const SizedBox(height: CustomSpacing.spacing200),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(CustomRadius.radius300),
-          child: Image.memory(
-            height: 180,
-            width: double.infinity,
-            Uri.parse(controller.base64).data!.contentAsBytes(),
-            fit: BoxFit.cover,
+        if (imageBase64 != null) ...[
+          const SizedBox(height: CustomSpacing.spacing200),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(CustomRadius.radius300),
+            child: Image.memory(
+              height: 180,
+              width: double.infinity,
+              Uri.parse(imageBase64).data!.contentAsBytes(),
+              fit: BoxFit.cover,
+            ),
           ),
-        ),
+        ],
+        if (replacementInfo != null) ...[
+          const SizedBox(height: CustomSpacing.spacing200),
+          Container(
+            width: double.infinity,
+            decoration: _getReplacementInfoDecoration(),
+            padding: const EdgeInsets.all(CustomSpacing.spacing300),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '대체 재료 정보',
+                  style: textTheme.label.copyWith(
+                    color: colorTheme.contentStandardPrimary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: CustomSpacing.spacing200),
+                Text(
+                  replacementInfo,
+                  style: textTheme.footnote.copyWith(
+                    color: colorTheme.contentStandardSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ],
     );
   }
 
-  Widget _buildReplaceButton() {
-    return CustomGestureDetectorWithOpacityInteraction(
-      onTap: () => {},
-      child: CustomGestureDetectorWithScaleInteraction(
-        onTap: () => {},
-        child: Container(
-          decoration: _getReplaceButtonDecoration(),
-          padding: const EdgeInsets.all(CustomSpacing.spacing200),
-          child: Icon(
-            Icons.restart_alt_rounded,
-            color: colorTheme.contentStandardTertiary,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildReplaceButtonWithLabel() {
-    return CustomGestureDetectorWithOpacityInteraction(
-      onTap: () => {},
-      child: CustomGestureDetectorWithScaleInteraction(
-        onTap: () => {},
-        child: Container(
-          decoration: _getReplaceButtonDecoration(),
-          padding: const EdgeInsets.all(CustomSpacing.spacing200),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.restart_alt_rounded,
-                color: colorTheme.contentStandardTertiary,
-              ),
-              const SizedBox(width: CustomSpacing.spacing200),
-              Text(
-                '다른 식재료로 바꾸기',
-                style: textTheme.label.copyWith(
-                  color: colorTheme.contentStandardSecondary,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
   Widget _buildCookingStepsSection() {
-    final cookingSteps = [
-      CookingStep(
-        stepNumber: 1,
-        description:
-            '먼저 국물용 멸치와 다시마를 사용해 10분간 끓여서 육수를 만듭니다. 다시마는 끓기 시작한 후에 제거합니다.',
-        details:
-            '오징어는 내장을 빼고 씻은 뒤, 몸통에 칼집을 내어 썰고 다리는 자릅니다. 새우는 머리와 껍질을 벗기고 내장을 제거한 후 씻습니다. 바지락은 씻어서 소금물에 담가 해감하고, 열린 껍데기는 버립니다. 이렇게 준비한 해산물로 요리하면 신선한 맛을 즐길 수 있습니다.',
-        imageBase64: controller.base64,
-      ),
-      CookingStep(
-        stepNumber: 2,
-        description:
-            '오징어는 내장을 빼고 씻은 뒤, 몸통에 칼집을 내어 썰고 다리는 자릅니다. 새우는 머리와 껍질을 벗기고 내장을 제거한 후 씻습니다. 바지락은 씻어서 소금물에 담가 해감하고, 열린 껍데기는 버립니다. 이렇게 준비한 해산물로 요리하면 신선한 맛을 즐길 수 있습니다.',
-        imageBase64: controller.base64,
-      ),
-      CookingStep(
-        stepNumber: 3,
-        description: '양배추, 양파, 대파, 청양고추, 마늘을 얇게 썰어 준비합니다.',
-        imageBase64: controller.base64,
-      ),
-    ];
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -441,99 +504,108 @@ class _RecipeContent extends StatelessWidget {
           ),
         ),
         const SizedBox(height: CustomSpacing.spacing400),
-        ListView.separated(
-          physics: const NeverScrollableScrollPhysics(),
-          shrinkWrap: true,
-          itemCount: cookingSteps.length,
-          separatorBuilder: (context, index) =>
-              const SizedBox(height: CustomSpacing.spacing200),
-          itemBuilder: (context, index) =>
-              _buildCookingStepItem(cookingSteps[index]),
-        ),
+        _buildCookingStepsList(),
       ],
     );
   }
 
-  Widget _buildCookingStepItem(CookingStep step) {
-    if (step.stepNumber == 1) {
-      return _buildDetailedCookingStep(step);
-    }
-    return _buildSimpleCookingStep(step);
+  Widget _buildCookingStepsList() {
+    return Obx(() {
+      final instructions = controller.recipe.value!.instructions;
+
+      return ListView.separated(
+        physics: const NeverScrollableScrollPhysics(),
+        shrinkWrap: true,
+        itemCount: instructions.length,
+        separatorBuilder: (context, index) =>
+            const SizedBox(height: CustomSpacing.spacing200),
+        itemBuilder: (context, index) {
+          final instruction = instructions[index];
+          return _buildCookingStepItem(instruction);
+        },
+      );
+    });
   }
 
-  Widget _buildSimpleCookingStep(CookingStep step) {
-    return CustomGestureDetectorWithScaleInteraction(
-      onTap: () => {},
-      child: CustomGestureDetectorWithOpacityInteraction(
-          onTap: () => {},
-          child: Container(
-            decoration: _getStepContainerDecoration(),
-            child: Padding(
-              padding: const EdgeInsets.all(CustomSpacing.spacing300),
-              child: Row(
+  Widget _buildCookingStepItem(Instruction instruction) {
+    return Obx(() {
+      final isExpanded = controller.expandedSteps[instruction.step] ?? false;
+      final isLoading = controller.loadingSteps[instruction.step] ?? false;
+      final details = controller.stepDetails[instruction.step];
+      final imageBase64 = controller.stepImages[instruction.step];
+
+      return CustomGestureDetectorWithScaleInteraction(
+        onTap: () => controller.toggleStepDetails(instruction.step),
+        child: Container(
+          decoration: _getStepContainerDecoration(),
+          padding: const EdgeInsets.all(CustomSpacing.spacing300),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  _buildStepNumber(step.stepNumber),
+                  _buildStepNumber(instruction.step),
                   const SizedBox(width: CustomSpacing.spacing300),
                   Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          step.description,
-                          style: textTheme.footnote.copyWith(
-                            color: colorTheme.contentStandardSecondary,
-                          ),
-                        ),
-                      ],
+                    child: Text(
+                      instruction.description,
+                      style: textTheme.footnote.copyWith(
+                        color: colorTheme.contentStandardSecondary,
+                      ),
                     ),
+                  ),
+                  const SizedBox(width: CustomSpacing.spacing200),
+                  Icon(
+                    isExpanded ? Icons.expand_less : Icons.expand_more,
+                    color: colorTheme.contentStandardTertiary,
+                    size: 20,
                   ),
                 ],
               ),
-            ),
-          )),
-    );
-  }
-
-  Widget _buildDetailedCookingStep(CookingStep step) {
-    return Container(
-      decoration: _getStepContainerDecoration(),
-      child: Padding(
-        padding: const EdgeInsets.all(CustomSpacing.spacing300),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildStepNumber(step.stepNumber),
-            const SizedBox(width: CustomSpacing.spacing300),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+              if (isExpanded) ...[
+                const SizedBox(height: CustomSpacing.spacing300),
+                if (isLoading)
+                  Center(
+                    child: SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          colorTheme.contentStandardTertiary,
+                        ),
+                      ),
+                    ),
+                  )
+                else if (details != null) ...[
                   Text(
-                    step.details ?? '',
+                    details.description,
                     style: textTheme.footnote.copyWith(
                       color: colorTheme.contentStandardSecondary,
                     ),
                     softWrap: true,
                   ),
-                  const SizedBox(height: CustomSpacing.spacing300),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(CustomRadius.radius300),
-                    child: Image.memory(
-                      height: 180,
-                      width: double.infinity,
-                      Uri.parse(step.imageBase64).data!.contentAsBytes(),
-                      fit: BoxFit.cover,
+                  if (imageBase64 != null) ...[
+                    const SizedBox(height: CustomSpacing.spacing300),
+                    ClipRRect(
+                      borderRadius:
+                          BorderRadius.circular(CustomRadius.radius300),
+                      child: Image.memory(
+                        height: 180,
+                        width: double.infinity,
+                        Uri.parse(imageBase64).data!.contentAsBytes(),
+                        fit: BoxFit.cover,
+                      ),
                     ),
-                  ),
+                  ],
                 ],
-              ),
-            ),
-          ],
+              ],
+            ],
+          ),
         ),
-      ),
-    );
+      );
+    });
   }
 
   Widget _buildStepNumber(int number) {
@@ -547,8 +619,9 @@ class _RecipeContent extends StatelessWidget {
       child: Center(
         child: Text(
           number.toString(),
-          style: textTheme.caption
-              .copyWith(color: colorTheme.contentStandardSecondary),
+          style: textTheme.caption.copyWith(
+            color: colorTheme.contentStandardSecondary,
+          ),
         ),
       ),
     );
@@ -577,6 +650,14 @@ class _RecipeContent extends StatelessWidget {
       border: Border.all(color: colorTheme.lineOutline),
     );
   }
+
+  BoxDecoration _getReplacementInfoDecoration() {
+    return BoxDecoration(
+      color: colorTheme.coreAccentTranslucent.withOpacity(0.1),
+      borderRadius: BorderRadius.circular(CustomRadius.radius300),
+      border: Border.all(color: colorTheme.coreAccent.withOpacity(0.3)),
+    );
+  }
 }
 
 class NutritionItem {
@@ -592,18 +673,4 @@ class IngredientItem {
   final bool hasDetails;
 
   IngredientItem(this.name, this.quantity, this.hasDetails);
-}
-
-class CookingStep {
-  final int stepNumber;
-  final String description;
-  final String? details;
-  final String imageBase64;
-
-  CookingStep({
-    required this.stepNumber,
-    required this.description,
-    this.details,
-    required this.imageBase64,
-  });
 }

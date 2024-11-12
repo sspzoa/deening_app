@@ -110,7 +110,7 @@ class SearchBarWidget extends StatelessWidget {
             ),
           ),
           CustomGestureDetectorWithOpacityInteraction(
-            onTap: () => {},
+            onTap: controller.onSearchTap,
             child: Icon(
               Icons.search_rounded,
               size: 24,

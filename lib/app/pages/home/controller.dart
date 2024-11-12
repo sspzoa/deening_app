@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../routes/routes.dart';
+
 class HomePageController extends GetxController {
   final searchController = TextEditingController();
 
@@ -15,6 +17,15 @@ class HomePageController extends GetxController {
   }
 
   void onSearchSubmitted(String value) {
-    debugPrint('Search submitted: $value');
+    if (value.trim().isNotEmpty) {
+      Get.toNamed(Routes.SEARCH_RESULT, arguments: {'query': value.trim()});
+    }
+  }
+
+  void onSearchTap() {
+    if (searchController.text.trim().isNotEmpty) {
+      Get.toNamed(Routes.SEARCH_RESULT,
+          arguments: {'query': searchController.text.trim()});
+    }
   }
 }

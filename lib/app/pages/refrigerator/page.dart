@@ -157,7 +157,7 @@ class StorageTypeSlider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final storageTypes = ['냉장보관', '냉동보관', '상온 보관'];
+    final storageTypes = ['냉장보관', '냉동보관', '상온보관'];
 
     return Container(
       decoration: BoxDecoration(

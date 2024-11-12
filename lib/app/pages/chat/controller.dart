@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../services/recipe/service.dart';
+
 enum MessageType { sender, receiver }
 
 class ChatMessage {
@@ -17,36 +19,66 @@ class ChatPageController extends GetxController {
   final messages = <ChatMessage>[].obs;
   final TextEditingController textController = TextEditingController();
 
+  // RecipeService 인스턴스
+  final RecipeService _recipeService = Get.find<RecipeService>();
+
+  // 레시피 정보 저장
+  late final String foodName;
+  late final String recipeId;
+
+  // 로딩 상태 관리
+  final isLoading = false.obs;
+
   @override
   void onInit() {
     super.onInit();
+
+    // Get.arguments에서 데이터 추출
+    final args = Get.arguments as Map<String, dynamic>;
+    foodName = args['foodName'] as String;
+    recipeId = args['recipeId'] as String;
+
     // 초기 메시지 설정
-    messages.addAll([
+    messages.add(
       ChatMessage(
-        text: "'해물짬뽕' 레시피에 대해 궁금한 게 있나요?",
+        text: "'$foodName' 레시피에 대해 궁금한 게 있나요?",
         type: MessageType.receiver,
       ),
-      ChatMessage(
-        text: "집에 바지락이 없어서 홍합을 넣고 싶은데 완성된 음식에 어떤 차이가 생길까?",
-        type: MessageType.sender,
-      ),
-      ChatMessage(
-        text:
-            "집에서 바지락 대신 홍합을 사용하면 약간의 차이가 있을 수 있지만 대체로 큰 문제는 없습니다. 홍합은 바지락보다 국물에 더 깊고 진한 해산물 풍미를 더해줍니다. 또한 홍합은 단맛이 조금 더 나기 때문에 결과적으로 국물이 조금 더 부드러워질 수 있습니다. 다만, 홍합을 사용할 경우 바지락보다 크기가 크니 껍데기를 제거하지 않고 넣는다면 식사 중 간편하게 먹을 수 있게 미리 껍데기를 제거하는 것도 좋습니다.",
-        type: MessageType.receiver,
-      ),
-    ]);
+    );
   }
 
-  void sendMessage(String text) {
+  Future<void> sendMessage(String text) async {
     if (text.isEmpty) return;
 
+    // 사용자 메시지 추가
     messages.add(ChatMessage(
       text: text,
       type: MessageType.sender,
     ));
 
-    // TODO: Add API call or message processing logic here
+    try {
+      isLoading.value = true;
+
+      // API 호출하여 응답 받기
+      final response = await _recipeService.chatWithRecipe(
+        recipeId: recipeId,
+        question: text,
+      );
+
+      // 응답 메시지 추가
+      messages.add(ChatMessage(
+        text: response,
+        type: MessageType.receiver,
+      ));
+    } catch (e) {
+      // 에러 메시지 추가
+      messages.add(ChatMessage(
+        text: "죄송합니다. 답변을 생성하는 중에 문제가 발생했습니다. 다시 시도해 주세요.",
+        type: MessageType.receiver,
+      ));
+    } finally {
+      isLoading.value = false;
+    }
   }
 
   @override

@@ -27,27 +27,116 @@ class ChatPage extends GetView<ChatPageController> {
                 decoration: BoxDecoration(
                   color: colorTheme.backgroundStandardSecondary,
                 ),
-                child: Obx(() => ListView.separated(
-                      itemCount: controller.messages.length,
-                      separatorBuilder: (context, index) =>
-                          const SizedBox(height: CustomSpacing.spacing700),
-                      itemBuilder: (context, index) {
-                        final message = controller.messages[index];
-                        return MessageBubble(
-                          message: message.text,
-                          type: message.type,
-                          showAvatar: index == 0 ||
-                              controller.messages[index - 1].type !=
-                                  message.type,
-                        );
-                      },
+                child: Obx(() => Stack(
+                      children: [
+                        ListView.separated(
+                          itemCount: controller.messages.length,
+                          separatorBuilder: (context, index) =>
+                              const SizedBox(height: CustomSpacing.spacing700),
+                          itemBuilder: (context, index) {
+                            final message = controller.messages[index];
+                            return MessageBubble(
+                              message: message.text,
+                              type: message.type,
+                              showAvatar: index == 0 ||
+                                  controller.messages[index - 1].type !=
+                                      message.type,
+                            );
+                          },
+                        ),
+                        if (controller.isLoading.value)
+                          const Center(
+                            child: CircularProgressIndicator(),
+                          ),
+                      ],
                     )),
               ),
             ),
-            ChatInput(
-              controller: controller.textController,
-              onSend: controller.sendMessage,
+            Obx(() => ChatInput(
+                  controller: controller.textController,
+                  onSend: controller.sendMessage,
+                  enabled: !controller.isLoading.value,
+                )),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class ChatInput extends StatelessWidget {
+  final void Function(String) onSend;
+  final TextEditingController controller;
+  final bool enabled;
+
+  const ChatInput({
+    super.key,
+    required this.onSend,
+    required this.controller,
+    this.enabled = true,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorTheme = Theme.of(context).extension<CustomColors>()!;
+    final textTheme = Theme.of(context).extension<CustomTypography>()!;
+
+    return Container(
+      padding: const EdgeInsets.all(CustomSpacing.spacing550),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(
+          horizontal: CustomSpacing.spacing300,
+          vertical: CustomSpacing.spacing200,
+        ),
+        decoration: BoxDecoration(
+          color: enabled
+              ? colorTheme.backgroundStandardPrimary
+              : colorTheme.backgroundStandardSecondary,
+          borderRadius: BorderRadius.circular(CustomRadius.radiusFull),
+          border: Border.all(
+            color: colorTheme.lineOutline,
+            width: 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: controller,
+                enabled: enabled,
+                style: textTheme.label.copyWith(
+                  color: colorTheme.contentStandardSecondary,
+                ),
+                decoration: InputDecoration(
+                  hintText: enabled ? '디닝에게 메시지 입력' : '답변을 생성중입니다...',
+                  hintStyle: textTheme.label.copyWith(
+                    color: colorTheme.contentStandardTertiary,
+                  ),
+                  border: InputBorder.none,
+                  contentPadding: EdgeInsets.zero,
+                  isDense: true,
+                ),
+                textAlignVertical: TextAlignVertical.center,
+              ),
             ),
+            CustomGestureDetectorWithOpacityInteraction(
+              onTap: enabled
+                  ? () {
+                      if (controller.text.isNotEmpty) {
+                        onSend(controller.text);
+                        controller.clear();
+                      }
+                    }
+                  : null,
+              child: Icon(
+                Icons.send_rounded,
+                size: 24,
+                color: enabled
+                    ? colorTheme.coreAccent
+                    : colorTheme.contentStandardTertiary,
+              ),
+            )
           ],
         ),
       ),
@@ -109,77 +198,6 @@ class MessageBubble extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-class ChatInput extends StatelessWidget {
-  final void Function(String) onSend;
-  final TextEditingController controller;
-
-  const ChatInput({
-    super.key,
-    required this.onSend,
-    required this.controller,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final colorTheme = Theme.of(context).extension<CustomColors>()!;
-    final textTheme = Theme.of(context).extension<CustomTypography>()!;
-
-    return Container(
-      padding: const EdgeInsets.all(CustomSpacing.spacing550),
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(
-          horizontal: CustomSpacing.spacing300,
-          vertical: CustomSpacing.spacing200,
-        ),
-        decoration: BoxDecoration(
-          color: colorTheme.backgroundStandardPrimary,
-          borderRadius: BorderRadius.circular(CustomRadius.radiusFull),
-          border: Border.all(
-            color: colorTheme.lineOutline,
-            width: 1,
-          ),
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: TextField(
-                controller: controller,
-                style: textTheme.label.copyWith(
-                  color: colorTheme.contentStandardSecondary,
-                ),
-                decoration: InputDecoration(
-                  hintText: '디닝에게 메시지 입력',
-                  hintStyle: textTheme.label.copyWith(
-                    color: colorTheme.contentStandardTertiary,
-                  ),
-                  border: InputBorder.none,
-                  contentPadding: EdgeInsets.zero,
-                  isDense: true,
-                ),
-                textAlignVertical: TextAlignVertical.center,
-              ),
-            ),
-            CustomGestureDetectorWithOpacityInteraction(
-              onTap: () {
-                if (controller.text.isNotEmpty) {
-                  onSend(controller.text);
-                  controller.clear();
-                }
-              },
-              child: Icon(
-                Icons.send_rounded,
-                size: 24,
-                color: colorTheme.coreAccent,
-              ),
-            )
-          ],
-        ),
-      ),
     );
   }
 }

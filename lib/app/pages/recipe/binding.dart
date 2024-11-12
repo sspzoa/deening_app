@@ -1,3 +1,4 @@
+import 'package:deening_app/app/services/recipe/service.dart';
 import 'package:get/get.dart';
 
 import 'controller.dart';
@@ -5,6 +6,7 @@ import 'controller.dart';
 class RecipePageBinding implements Bindings {
   @override
   void dependencies() {
+    Get.lazyPut(() => RecipeService());
     Get.lazyPut(() => RecipePageController());
   }
 }

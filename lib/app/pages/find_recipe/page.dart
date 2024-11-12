@@ -55,6 +55,7 @@ class FindRecipePage extends GetView<FindRecipePageController> {
                       )),
                   const SizedBox(height: CustomSpacing.spacing200),
                   TextField(
+                    controller: controller.textController,
                     decoration: InputDecoration(
                       hintText: '요리 이름으로 찾아보세요',
                       hintStyle: textTheme.label.copyWith(
@@ -88,7 +89,7 @@ class FindRecipePage extends GetView<FindRecipePageController> {
                   const SizedBox(height: CustomSpacing.spacing200),
                   CustomButton(
                     text: '찾아보기',
-                    onTap: () => {},
+                    onTap: controller.findRecipe,
                   ),
                 ],
               )
