@@ -1,11 +1,12 @@
-import 'package:deening_app/app/widgets/button.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../core/theme/colors.dart';
 import '../../core/theme/static.dart';
 import '../../core/theme/typography.dart';
+import '../../services/preferece/model.dart';
 import '../../widgets/appBar.dart';
+import '../../widgets/button.dart';
 import '../../widgets/gestureDetector.dart';
 import 'controller.dart';
 
@@ -205,59 +206,147 @@ class PreferenceTypeSlider extends StatelessWidget {
   }
 }
 
-class KeywordsList extends StatelessWidget {
-  final List<Keyword> keywords;
-  final CustomColors colorTheme;
-  final CustomTypography textTheme;
-
-  const KeywordsList({
-    super.key,
-    required this.keywords,
-    required this.colorTheme,
-    required this.textTheme,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    if (keywords.isEmpty) {
-      return Center(
-        child: Text(
-          '키워드가 없습니다',
-          style: textTheme.body.copyWith(
-            color: colorTheme.contentStandardTertiary,
-          ),
-        ),
-      );
-    }
-
-    return ListView.separated(
-      physics: const BouncingScrollPhysics(),
-      itemCount: keywords.length,
-      separatorBuilder: (context, index) =>
-          const SizedBox(height: CustomSpacing.spacing200),
-      itemBuilder: (context, index) {
-        final keyword = keywords[index];
-        return KeywordItem(
-          name: keyword.name,
-          colorTheme: colorTheme,
-          textTheme: textTheme,
-        );
-      },
-    );
-  }
-}
-
 class KeywordItem extends StatelessWidget {
-  final String name;
+  final Keyword keyword;
   final CustomColors colorTheme;
   final CustomTypography textTheme;
 
   const KeywordItem({
     super.key,
-    required this.name,
+    required this.keyword,
     required this.colorTheme,
     required this.textTheme,
   });
+
+  void _showEditDialog(BuildContext context) {
+    final controller = Get.find<PreferencePageController>();
+    final editingController = TextEditingController(text: keyword.name);
+
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        backgroundColor: colorTheme.backgroundStandardPrimary,
+        child: Container(
+          padding: const EdgeInsets.all(CustomSpacing.spacing550),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                '키워드 수정하기',
+                style: textTheme.heading.copyWith(
+                  color: colorTheme.contentStandardPrimary,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: CustomSpacing.spacing550),
+              TextField(
+                controller: editingController,
+                decoration: InputDecoration(
+                  labelText: '키워드',
+                  labelStyle: textTheme.footnote.copyWith(
+                    color: colorTheme.contentStandardTertiary,
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: colorTheme.lineOutline),
+                    borderRadius: BorderRadius.circular(CustomRadius.radius300),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: colorTheme.coreAccent),
+                    borderRadius: BorderRadius.circular(CustomRadius.radius300),
+                  ),
+                ),
+                style: textTheme.body.copyWith(
+                  color: colorTheme.contentStandardPrimary,
+                ),
+              ),
+              const SizedBox(height: CustomSpacing.spacing550),
+              Row(
+                children: [
+                  Expanded(
+                    child: CustomButton(
+                      text: '삭제하기',
+                      onTap: () {
+                        Get.back();
+                        _showDeleteConfirmationDialog();
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: CustomSpacing.spacing300),
+                  Expanded(
+                    child: CustomButton(
+                      text: '수정하기',
+                      onTap: () {
+                        if (editingController.text.isNotEmpty) {
+                          controller.updateKeyword(
+                            keyword.id,
+                            editingController.text,
+                          );
+                        }
+                        Get.back();
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showDeleteConfirmationDialog() {
+    final controller = Get.find<PreferencePageController>();
+
+    Get.dialog(
+      Dialog(
+        backgroundColor: colorTheme.backgroundStandardPrimary,
+        child: Container(
+          padding: const EdgeInsets.all(CustomSpacing.spacing550),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                '키워드를 삭제하시겠습니까?',
+                style: textTheme.heading.copyWith(
+                  color: colorTheme.contentStandardPrimary,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: CustomSpacing.spacing200),
+              Text(
+                '삭제된 키워드는 복구할 수 없습니다.',
+                style: textTheme.footnote.copyWith(
+                  color: colorTheme.contentStandardTertiary,
+                ),
+              ),
+              const SizedBox(height: CustomSpacing.spacing550),
+              Row(
+                children: [
+                  Expanded(
+                    child: CustomButton(
+                      text: '취소',
+                      onTap: () => Get.back(),
+                    ),
+                  ),
+                  const SizedBox(width: CustomSpacing.spacing300),
+                  Expanded(
+                    child: CustomButton(
+                      text: '삭제',
+                      onTap: () {
+                        Get.back();
+                        controller.deleteKeyword(keyword.id);
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -278,7 +367,7 @@ class KeywordItem extends StatelessWidget {
                 vertical: CustomSpacing.spacing200,
               ),
               child: Text(
-                name,
+                keyword.name,
                 style: textTheme.label.copyWith(
                   color: colorTheme.contentStandardPrimary,
                 ),
@@ -287,29 +376,80 @@ class KeywordItem extends StatelessWidget {
           ),
           const SizedBox(width: CustomSpacing.spacing100),
           CustomGestureDetectorWithOpacityInteraction(
-            onTap: () => {},
-            child: CustomGestureDetectorWithScaleInteraction(
-              onTap: () => {},
-              child: Container(
-                decoration: BoxDecoration(
-                  color: colorTheme.coreAccentTranslucent,
-                  borderRadius: BorderRadius.circular(CustomRadius.radius300),
-                  border: Border.all(
-                    color: colorTheme.lineOutline,
-                  ),
-                ),
-                padding: const EdgeInsets.all(CustomSpacing.spacing200),
-                child: Center(
-                  child: Icon(
-                    Icons.edit_rounded,
-                    color: colorTheme.contentStandardTertiary,
-                  ),
+            onTap: () => _showEditDialog(context),
+            child: Container(
+              decoration: BoxDecoration(
+                color: colorTheme.coreAccentTranslucent,
+                borderRadius: BorderRadius.circular(CustomRadius.radius300),
+                border: Border.all(
+                  color: colorTheme.lineOutline,
                 ),
               ),
+              padding: const EdgeInsets.all(CustomSpacing.spacing200),
+              child: Icon(
+                Icons.edit_rounded,
+                color: colorTheme.contentStandardTertiary,
+              ),
             ),
-          )
+          ),
+          const SizedBox(width: CustomSpacing.spacing100),
+          CustomGestureDetectorWithOpacityInteraction(
+            onTap: () => _showDeleteConfirmationDialog(),
+            child: Container(
+              decoration: BoxDecoration(
+                color: colorTheme.coreAccentTranslucent,
+                borderRadius: BorderRadius.circular(CustomRadius.radius300),
+                border: Border.all(
+                  color: colorTheme.lineOutline,
+                ),
+              ),
+              padding: const EdgeInsets.all(CustomSpacing.spacing200),
+              child: const Icon(
+                Icons.delete_outline_rounded,
+                color: Colors.red,
+              ),
+            ),
+          ),
         ],
       ),
+    );
+  }
+}
+
+class KeywordsList extends StatelessWidget {
+  final List<Keyword> keywords;
+  final CustomColors colorTheme;
+  final CustomTypography textTheme;
+
+  const KeywordsList({
+    super.key,
+    required this.keywords,
+    required this.colorTheme,
+    required this.textTheme,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (keywords.isEmpty) {
+      return Center(
+        child: CircularProgressIndicator(
+          valueColor: AlwaysStoppedAnimation(colorTheme.coreAccent),
+        ),
+      );
+    }
+
+    return ListView.separated(
+      physics: const BouncingScrollPhysics(),
+      itemCount: keywords.length,
+      separatorBuilder: (context, index) =>
+          const SizedBox(height: CustomSpacing.spacing200),
+      itemBuilder: (context, index) {
+        return KeywordItem(
+          keyword: keywords[index],
+          colorTheme: colorTheme,
+          textTheme: textTheme,
+        );
+      },
     );
   }
 }

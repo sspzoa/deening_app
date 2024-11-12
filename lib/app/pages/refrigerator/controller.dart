@@ -1,5 +1,7 @@
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 
+import '../../routes/routes.dart';
 import '../../services/refrigerator/model.dart';
 import '../../services/refrigerator/service.dart';
 
@@ -8,6 +10,7 @@ class RefrigeratorPageController extends GetxController {
 
   final selectedStorageIndex = 0.obs;
   final _items = Rxn<Map<String, List<Ingredient>>>();
+  final ImagePicker imagePicker = ImagePicker();
 
   Map<String, List<Ingredient>> get currentItems {
     if (_items.value == null) return {};
@@ -92,5 +95,20 @@ class RefrigeratorPageController extends GetxController {
   Future<void> addIngredients(List<NewIngredient> ingredients) async {
     await _service.addIngredients(ingredients: ingredients);
     await refreshIngredients();
+  }
+
+  Future<void> detectIngredients() async {
+    XFile? imageData = await imagePicker.pickImage(
+        source: ImageSource.camera,
+        preferredCameraDevice: CameraDevice.rear,
+        maxHeight: 2048,
+        maxWidth: 1024);
+    if (imageData != null) {
+      final detectedIngredients =
+          await _service.detectIngredients(image: imageData);
+      if (detectedIngredients.isNotEmpty) {
+        Get.toNamed(Routes.ADD_INGREDIENTS, arguments: detectedIngredients);
+      }
+    }
   }
 }

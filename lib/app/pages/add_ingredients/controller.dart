@@ -1,4 +1,4 @@
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../services/refrigerator/model.dart';
@@ -12,8 +12,21 @@ class AddIngredientsPageController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    // 초기 폼 하나 추가
-    addNewForm();
+
+    // 감지된 재료 목록 가져오기
+    final List<String>? detectedIngredients = Get.arguments;
+
+    if (detectedIngredients != null && detectedIngredients.isNotEmpty) {
+      // 감지된 각 재료에 대해 폼 생성
+      for (var ingredientName in detectedIngredients) {
+        final form = IngredientForm();
+        form.nameController.text = ingredientName;
+        ingredients.add(form);
+      }
+    } else {
+      // 감지된 재료가 없는 경우 빈 폼 하나 추가
+      addNewForm();
+    }
   }
 
   void addNewForm() {

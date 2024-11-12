@@ -11,6 +11,8 @@ import '../refrigerator/page.dart';
 import 'controller.dart';
 
 class AddIngredientsPage extends GetView<AddIngredientsPageController> {
+  const AddIngredientsPage({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     final colorTheme = Theme.of(context).extension<CustomColors>()!;

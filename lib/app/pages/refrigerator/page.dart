@@ -231,7 +231,8 @@ class IngredientsList extends StatelessWidget {
     }
 
     return ListView.separated(
-      physics: const BouncingScrollPhysics(),
+      physics:
+          const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
       itemCount: items.length,
       separatorBuilder: (context, index) =>
           const SizedBox(height: CustomSpacing.spacing700),

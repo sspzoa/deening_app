@@ -11,7 +11,7 @@ class PreferenceRepository {
       : api = api ?? Get.find<ApiProvider>();
 
   Future<PreferenceResponse> getKeywords() async {
-    String url = '/preference/keywords';
+    String url = '/preferences/keywords';
 
     CustomHttpResponse response = await api.get(url);
 
@@ -21,21 +21,21 @@ class PreferenceRepository {
   }
 
   Future<void> addKeyword({required NewKeyword keyword}) async {
-    String url = '/preference/keywords';
+    String url = '/preferences/keywords';
 
-    await api.put(url, data: keyword);
+    await api.put(url, data: keyword.toJson());
   }
 
   Future<void> deleteKeyword({required String keywordId}) async {
-    String url = '/preference/keywords/$keywordId';
+    String url = '/preferences/keyword/$keywordId';
 
     await api.delete(url);
   }
 
   Future<void> updateKeyword(
       {required String keywordId, required NewKeyword keyword}) async {
-    String url = '/preference/keywords/$keywordId';
+    String url = '/preferences/keyword/$keywordId';
 
-    await api.patch(url, data: keyword);
+    await api.patch(url, data: keyword.toJson());
   }
 }
