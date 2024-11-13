@@ -27,7 +27,7 @@ class RefrigeratorPage extends GetView<RefrigeratorPageController> {
             children: [
               CustomGestureDetectorWithOpacityInteraction(
                 onTap: () =>
-                    _showAddIngredientModal(context, colorTheme, textTheme),
+                    _showAddIngredientModal(context, colorTheme, textTheme, controller),
                 child: Icon(
                   Icons.add_rounded,
                   size: 24,
@@ -93,6 +93,7 @@ void _showAddIngredientModal(
   BuildContext context,
   CustomColors colorTheme,
   CustomTypography textTheme,
+    controller,
 ) {
   showModalBottomSheet(
     context: context,
@@ -131,7 +132,7 @@ void _showAddIngredientModal(
             CustomButton(
               text: '사진으로 입력하기',
               icon: Icons.camera_alt_outlined,
-              onTap: () => {},
+              onTap: () => controller.detectIngredients(),
             ),
             const SizedBox(height: CustomSpacing.spacing550),
           ],
